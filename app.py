@@ -1,41 +1,29 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect
+import requests
 
-# Membuat instance dari aplikasi Flask
 app = Flask(__name__)
 
-@app.route('/webhook', methods=['GET', 'POST'])
-def webhook():
-    # Permintaan verifikasi (GET)
-    if request.method == 'GET':
-        verify_token = request.args.get('hub.verify_token')
-        challenge = request.args.get('hub.challenge')
+@app.route('/callback')
+def callback():
+    # Mendapatkan parameter 'code' dari URL
+    code = request.args.get('code')
 
-        # Cek apakah verify_token sesuai
-        if verify_token == 'TOKEN_VERIFIKASI_KAMU':
-            return challenge
-        return 'Token verifikasi salah', 403
+    if code:
+        # Tukar code dengan token akses menggunakan API Instagram (atau Facebook)
+        access_token_url = f"https://graph.instagram.com/access_token?client_id={YOUR_APP_ID}&client_secret={YOUR_APP_SECRET}&grant_type=authorization_code&redirect_uri={YOUR_REDIRECT_URI}&code={code}"
 
-    # Permintaan webhook (POST)
-    if request.method == 'POST':
-        data = request.json
-        print("Data Webhook Diterima:", data)
+        # Mengirimkan permintaan untuk mendapatkan access token
+        response = requests.get(access_token_url)
+        data = response.json()
 
-        # Ekstrak data komentar
-        for entry in data.get("entry", []):
-            for messaging in entry.get("messaging", []):
-                comment_text = messaging.get("message", "")
-
-                # Filter komentar berdasarkan kode yang tepat (misalnya "Kode_1")
-                valid_comments = [
-                    comment for comment in comment_text.split() if comment.strip() == "Kode_1"
-                ]
-
-                if valid_comments:
-                    print(f"Komentar Valid Ditemukan: {valid_comments}")
-                    print(f"Jumlah Komentar Valid: {len(valid_comments)}")
-        
-        return jsonify(status='received')
+        if "access_token" in data:
+            # Menyimpan access_token atau proses lebih lanjut
+            access_token = data["access_token"]
+            return jsonify({"message": "Akses berhasil!", "access_token": access_token})
+        else:
+            return jsonify({"message": "Gagal mendapatkan access token!"}), 400
+    else:
+        return jsonify({"message": "Code tidak ditemukan!"}), 400
 
 if __name__ == '__main__':
-    # Menjalankan aplikasi Flask
     app.run(debug=True, port=5000)
