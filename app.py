@@ -14,7 +14,7 @@ def callback():
             return jsonify(message="Code tidak ditemukan!"), 400
 
         # Proses 'code' untuk mendapatkan token akses dari Instagram
-        access_token_url = f"https://graph.instagram.com/access_token?client_id={YOUR_APP_ID}&client_secret={YOUR_APP_SECRET}&grant_type=authorization_code&redirect_uri={YOUR_REDIRECT_URI}&code={code}"
+        access_token_url = f"https://graph.instagram.com/access_token?client_id={1671248000474432}&client_secret={6d7162c3ca1654ed02bad976e9db516c}&grant_type=authorization_code&redirect_uri={YOUR_REDIRECT_URI}&code={code}"
 
         # Mengirimkan permintaan untuk mendapatkan access token
         response = requests.get(access_token_url)
